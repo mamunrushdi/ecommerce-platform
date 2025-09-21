@@ -71,8 +71,4 @@ public class BeautifulLogin extends JFrame {
         add(panel);
         setVisible(true);
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(BeautifulLogin::new);
-    }
 }
