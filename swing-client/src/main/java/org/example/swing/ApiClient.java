@@ -13,12 +13,14 @@ import java.util.List;
 
 public class ApiClient {
 
-    private final String gatewayBaseUrl = "http://localhost:8081"; // API Gateway URL
+
+    // Base URL of your API Gateway
+    private static final String GATEWAY_URL = "http://localhost:8080";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Fetch all products
     public List<Product> fetchProducts() throws IOException {
-        String urlString = gatewayBaseUrl + "/products";
+        String urlString = GATEWAY_URL + "/products";
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -39,7 +41,7 @@ public class ApiClient {
 
     // Place an order
     public void placeOrder(Cart cart) throws IOException {
-        String urlString = gatewayBaseUrl + "/orders/place";
+        String urlString = GATEWAY_URL + "/orders";
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);
@@ -60,7 +62,7 @@ public class ApiClient {
 
     // Login user
     public boolean loginUser(String username, String password) throws IOException {
-        String urlString = gatewayBaseUrl + "/users/login";
+        String urlString = GATEWAY_URL + "/users/login";
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setDoOutput(true);

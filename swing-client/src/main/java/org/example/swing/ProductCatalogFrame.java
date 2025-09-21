@@ -49,7 +49,7 @@ public class ProductCatalogFrame extends JFrame {
         SwingWorker<List<Product>, Void> worker = new SwingWorker<>() {
             @Override
             protected List<Product> doInBackground() throws Exception {
-                // Call the API Gateway to fetch products
+                // Call the API Gateway to fetchCheckout products
                 return apiClient.fetchProducts();
             }
 

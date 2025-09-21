@@ -10,7 +10,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String customerName;
+    private String customerName  = "User Name" + id;
     private double totalAmount;
     // add order items as a relationship if needed
 }

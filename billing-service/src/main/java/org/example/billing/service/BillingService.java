@@ -4,6 +4,8 @@ import org.example.billing.model.Payment;
 import org.example.billing.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class BillingService {
 
@@ -16,6 +18,10 @@ public class BillingService {
     public Payment processPayment(Payment payment) {
         payment.setStatus("PAID"); // simple example
         return paymentRepository.save(payment);
+    }
+
+    public List<Payment> getBillings() {
+        return paymentRepository.findAll();
     }
 
     public Payment getPaymentStatus(Long orderId) {

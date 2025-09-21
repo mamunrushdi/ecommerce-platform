@@ -11,7 +11,7 @@ public class CartFrame extends JFrame {
     private final CartTableModel tableModel;
     private final JTable table;
     private final JLabel totalLabel;
-
+    private final ApiClient apiClient = new ApiClient();
     public CartFrame() {
         setTitle("Cart");
         setSize(600, 400);
@@ -69,11 +69,39 @@ public class CartFrame extends JFrame {
 
     private void removeSelected() {
         int row = table.getSelectedRow();
-        if (row < 0) { JOptionPane.showMessageDialog(this, "Select an item first."); return; }
+        if (row < 0) {
+            JOptionPane.showMessageDialog(this, "Select an item first.");
+            return;
+        }
         CartItem it = tableModel.getItemAt(row);
         if (it == null) return;
         Cart.getInstance().removeProduct(it.getProduct().getId());
         refresh();
+    }
+
+//    private void doCheckout() {
+//        if (Cart.getInstance().isEmpty()) {
+//            JOptionPane.showMessageDialog(this, "Cart is empty.");
+//            return;
+//        }
+//        int confirm = JOptionPane.showConfirmDialog(this,
+//                "Total: $" + String.format("%.2f", Cart.getInstance().getTotal()) + "\nProceed to checkout?",
+//                "Checkout",
+//                JOptionPane.YES_NO_OPTION);
+//        if (confirm == JOptionPane.YES_OPTION) {
+//            // TODO: Replace this stub with a REST call to Order Service / Billing Service.
+//            // Example: call OrderService API, then BillingService API.
+//            // For now we simulate an order id and clear the cart:
+//            String fakeOrderId = "ORD-" + System.currentTimeMillis();
+//            JOptionPane.showMessageDialog(this, "Order placed. Order ID: " + fakeOrderId);
+//            Cart.getInstance().clear();
+//            refresh();
+//        }
+//    }
+
+    private void refresh() {
+        tableModel.refresh();
+        totalLabel.setText("Total: $" + String.format("%.2f", Cart.getInstance().getTotal()));
     }
 
     private void doCheckout() {
@@ -81,23 +109,40 @@ public class CartFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Cart is empty.");
             return;
         }
+
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Total: $" + String.format("%.2f", Cart.getInstance().getTotal()) + "\nProceed to checkout?",
                 "Checkout",
                 JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            // TODO: Replace this stub with a REST call to Order Service / Billing Service.
-            // Example: call OrderService API, then BillingService API.
-            // For now we simulate an order id and clear the cart:
-            String fakeOrderId = "ORD-" + System.currentTimeMillis();
-            JOptionPane.showMessageDialog(this, "Order placed. Order ID: " + fakeOrderId);
-            Cart.getInstance().clear();
-            refresh();
-        }
-    }
 
-    private void refresh() {
-        tableModel.refresh();
-        totalLabel.setText("Total: $" + String.format("%.2f", Cart.getInstance().getTotal()));
+        if (confirm == JOptionPane.YES_OPTION) {
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                private String errorMessage;
+
+                @Override
+                protected Void doInBackground() {
+                    try {
+                        apiClient.placeOrder(Cart.getInstance()); // call API Gateway
+                    } catch (Exception e) {
+                        errorMessage = e.getMessage();
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    if (errorMessage != null) {
+                        JOptionPane.showMessageDialog(CartFrame.this,
+                                "Checkout failed: " + errorMessage);
+                    } else {
+                        JOptionPane.showMessageDialog(CartFrame.this,
+                                "Order placed successfully!");
+                        Cart.getInstance().clear();
+                        refresh();
+                    }
+                }
+            };
+            worker.execute();
+        }
     }
 }

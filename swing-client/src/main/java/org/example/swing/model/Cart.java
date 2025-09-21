@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Cart {
     private static final Cart INSTANCE = new Cart();
-    private final Map<Long, CartItem> items = new LinkedHashMap<>();
+    private final Map<String, CartItem> items = new LinkedHashMap<>();
 
     private Cart() {
     }
@@ -30,14 +30,14 @@ public class Cart {
             it.setQuantity(it.getQuantity());
         }
     }
-    public synchronized void updateQuantity(Long productId, int qty) {
+    public synchronized void updateQuantity(String productId, int qty) {
         CartItem it = items.get(productId);
         if (it == null) return;
         if (qty <= 0) items.remove(productId);
         else it.setQuantity(qty);
     }
 
-    public synchronized void removeProduct(Long productId) {
+    public synchronized void removeProduct(String productId) {
         items.remove(productId);
     }
 

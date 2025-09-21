@@ -4,6 +4,8 @@ import org.example.billing.model.Payment;
 import org.example.billing.service.BillingService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/billing")
 public class BillingController {
@@ -14,6 +16,10 @@ public class BillingController {
         this.billingService = billingService;
     }
 
+    @GetMapping
+    public List<Payment> getBillings() {
+        return billingService.getBillings();
+    }
     @PostMapping
     public Payment processPayment(@RequestBody Payment payment) {
         return billingService.processPayment(payment);
