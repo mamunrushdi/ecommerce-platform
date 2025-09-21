@@ -7,9 +7,9 @@ import java.awt.*;
 
 @Getter
 public class BeautifulLogin extends JFrame {
-    private JTextField usernameField;
-    private JPasswordField passwordField;
-    private JButton loginButton;
+    private final JTextField usernameField;
+    private final JPasswordField passwordField;
+    private final JButton loginButton;
 
     public BeautifulLogin() {
         setTitle("Login");
