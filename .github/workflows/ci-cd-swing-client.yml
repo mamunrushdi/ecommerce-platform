@@ -8,21 +8,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: "17"
 
+      # 3. Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -30,22 +33,36 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: Build Swing Client
-        run: mvn -f swing-client/pom.xml clean package -DskipTests
+      # 4. Build all microservices modules first
+      - name: Build Microservices & Common Models
+        run: mvn clean install -DskipTests -pl "common-models,product-service,order-service,billing-service,analytics-service,api-gateway"
 
+      # 5. Build Swing Client
+      - name: Build Swing Client JAR
+        run: mvn clean package -pl swing-client -DskipTests
+
+      # 6. Create OS-specific installer with jpackage
       - name: Create Installer with jpackage
         run: |
+          rm -rf swing-client/installer
           mkdir -p swing-client/installer
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            TYPE="exe"
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            TYPE="deb"
+          fi
+          JAR_FILE=$(ls swing-client/target/swing-client-*-jar-with-dependencies.jar)
           jpackage \
-            --type dmg \
+            --type $TYPE \
             --name "EcommerceSwingClient" \
             --input swing-client/target \
-            --main-jar swing-client-1.0.0.jar \
+            --main-jar "$JAR_FILE" \
             --main-class org.example.swing.AppClient \
             --dest swing-client/installer \
             --icon swing-client/src/main/resources/icon.ico
 
-      - name: Upload Artifacts
+      # 7. Upload installer as GitHub artifact
+      - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
           name: SwingClientInstaller-${{ matrix.os }}
