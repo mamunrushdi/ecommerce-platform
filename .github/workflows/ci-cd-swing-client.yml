@@ -14,18 +14,15 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: "temurin"
-          java-version: "17"
+          distribution: temurin
+          java-version: 17
 
-      # 3. Cache Maven dependencies
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
@@ -33,36 +30,31 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      # 4. Build all microservices modules first
-      - name: Build Microservices & Common Models
-        run: mvn clean install -DskipTests -pl "common-models,product-service,order-service,billing-service,analytics-service,api-gateway"
+      - name: Build all modules (skip tests)
+        run: mvn clean install -DskipTests
 
-      # 5. Build Swing Client
-      - name: Build Swing Client JAR
-        run: mvn clean package -pl swing-client -DskipTests
+      - name: Run unit tests
+        run: mvn test
 
-      # 6. Create OS-specific installer with jpackage
+      - name: SonarQube Scan
+        run: mvn sonar:sonar \
+          -Dsonar.projectKey=ecommerce-platform \
+          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
       - name: Create Installer with jpackage
         run: |
-          rm -rf swing-client/installer
           mkdir -p swing-client/installer
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            TYPE="exe"
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            TYPE="deb"
-          fi
-          JAR_FILE=$(ls swing-client/target/swing-client-*-jar-with-dependencies.jar)
           jpackage \
-            --type $TYPE \
+            --type dmg \
             --name "EcommerceSwingClient" \
             --input swing-client/target \
-            --main-jar "$JAR_FILE" \
+            --main-jar swing-client-1.0.0.jar \
             --main-class org.example.swing.AppClient \
             --dest swing-client/installer \
             --icon swing-client/src/main/resources/icon.ico
 
-      # 7. Upload installer as GitHub artifact
-      - name: Upload Installer Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: SwingClientInstaller-${{ matrix.os }}
