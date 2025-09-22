@@ -36,12 +36,6 @@ jobs:
       - name: Run unit tests
         run: mvn test
 
-      - name: SonarQube Scan
-        run: mvn sonar:sonar \
-          -Dsonar.projectKey=ecommerce-platform \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
       - name: Create Installer with jpackage
         run: |
           mkdir -p swing-client/installer

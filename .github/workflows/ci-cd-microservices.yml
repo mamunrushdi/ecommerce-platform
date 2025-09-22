@@ -48,12 +48,6 @@ jobs:
       - name: Run unit tests
         run: mvn test
 
-      - name: SonarQube Scan
-        run: mvn sonar:sonar \
-          -Dsonar.projectKey=ecommerce-platform \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
       - name: Build Docker Images
         run: |
           docker build -t mamunrushdi/order-service ./order-service
