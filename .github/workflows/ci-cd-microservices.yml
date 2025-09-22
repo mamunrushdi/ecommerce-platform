@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline - Multi-Module
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
 
-      - name: Build with Maven (skip tests for speed)
+      - name: Build all modules (skip tests for speed)
         run: mvn clean install -DskipTests
 
       - name: Run unit tests
@@ -58,7 +58,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Build Docker Images
+      - name: Build Docker Images (Microservices only)
         run: |
           docker build -t mamunrushdi/order-service ./order-service
           docker build -t mamunrushdi/billing-service ./billing-service
