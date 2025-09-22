@@ -39,6 +39,7 @@
         <dependency>
             <groupId>org.example</groupId>
             <artifactId>common-models</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
